@@ -19,8 +19,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 
-#include "hello_world/visibility_control.h"
-
 using namespace std::chrono_literals;
 
 // ネームスペースの設定
@@ -30,34 +28,31 @@ namespace hello_world
 class TalkerComponent : public rclcpp::Node
 {
 public:
-  // マルチOSに対応した共有ライブラリの最適化
-  HELLO_WORLD_PUBLIC
   // コンストラクター引数をNodeOptionsに変更
   explicit TalkerComponent(const rclcpp::NodeOptions & options)
-  : Node("talker_component", options)
+  : Node("talker_component", options), count_(0)
   {
-    // タイマー実行されるイベントハンドラー関数
     auto publish_message =
-      [this]() -> void  // ラムダ式による関数オブジェクトの定義
+      [this]() -> void
       {
-        // 送信するメッセージ
+        // ゼロコピーのためには，送信するメッセージがUniquePtrであることが大事らしい
         auto msg = std::make_unique<std_msgs::msg::String>();
-        msg->data = "Hello World!";
+        msg->data = "Hello World! " + std::to_string(count_++);
 
-        RCLCPP_INFO(this->get_logger(), "%s", msg->data.c_str());
+        RCLCPP_INFO(this->get_logger(), "[%p] %s", msg.get(), msg->data.c_str());
+        // UniquePtrなのでstd::move()でmoveする
         pub_->publish(std::move(msg));
       };
 
-    // chatterトピックの送信設定
     rclcpp::QoS qos(rclcpp::KeepLast(10));
     pub_ = create_publisher<std_msgs::msg::String>("chatter", qos);
-    // publish_messageの100ミリ秒周期でのタイマー実行
-    timer_ = create_wall_timer(100ms, publish_message);
+    timer_ = create_wall_timer(1s, publish_message);
   }
 
 private:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
+  uint32_t count_;
 };  // class TalkerComponent
 
 }  // namespace hello_world

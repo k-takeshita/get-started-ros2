@@ -18,8 +18,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 
-#include "hello_world/visibility_control.h"
-
 using namespace std::chrono_literals;
 
 // ネームスペースの設定
@@ -29,8 +27,6 @@ namespace hello_world
 class ListenerComponent : public rclcpp::Node
 {
 public:
-  // マルチOSに対応した共有ライブラリの最適化
-  HELLO_WORLD_PUBLIC
   // コンストラクター引数をNodeOptionsに変更
   explicit ListenerComponent(const rclcpp::NodeOptions & options)
   : Node("listener_component", options)
@@ -39,7 +35,7 @@ public:
     auto callback =
       [this](const std_msgs::msg::String::UniquePtr msg) -> void
       {
-        RCLCPP_INFO(this->get_logger(), "%s", msg->data.c_str());
+        RCLCPP_INFO(this->get_logger(), "[%p] %s", msg.get(), msg->data.c_str());
       };
 
     // chatterトピックの受信設定

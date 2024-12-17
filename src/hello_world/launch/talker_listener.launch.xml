@@ -7,10 +7,14 @@
     <composable_node pkg="hello_world"
                      plugin="hello_world::TalkerComponent"
                      name="talker_component"
-                     namespace="hello_world" />
+                     namespace="hello_world">
+      <extra_arg name="use_intra_process_comms" value="true"/>
+    </composable_node>
     <composable_node pkg="hello_world"
                      plugin="hello_world::ListenerComponent"
                      name="listener_component"
-                     namespace="hello_world" />
+                     namespace="hello_world">
+      <extra_arg name="use_intra_process_comms" value="true"/>
+    </composable_node>
   </node_container>
 </launch>

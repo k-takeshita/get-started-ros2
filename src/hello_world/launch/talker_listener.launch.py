@@ -20,7 +20,7 @@ def generate_launch_description():
     return LaunchDescription([
         launch_ros.actions.Node(
             package='hello_world', namespace='hello_world',
-            executable='talker', name='talker',
+            executable='talker',
             output='screen'),
         launch_ros.actions.Node(
             package='hello_world', namespace='hello_world',

@@ -15,18 +15,19 @@
 from launch import LaunchDescription
 import launch.substitutions
 import launch_ros.actions
-import os
-
+# import os
 
 def generate_launch_description():
-    params = os.path.join(os.path.dirname(__file__), 'params.yaml')
+    params_file = launch.substitutions.PathJoinSubstitution([launch.substitutions.ThisLaunchFileDir(), 'params.yaml'])
+    # これでも動く
+    # params_file = os.path.join(os.path.dirname(__file__), 'params.yaml')
 
     return LaunchDescription([
         launch_ros.actions.Node(
             package='hello_world', namespace='hello_world',
             executable='talker_with_service_param',
             name='talker', output='screen',
-            parameters=[params]),
+            parameters=[params_file]),
         launch_ros.actions.Node(
             package='hello_world', namespace='hello_world',
             executable='listener', name='listener',

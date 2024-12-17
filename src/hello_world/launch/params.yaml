@@ -1,3 +1,4 @@
-talker:
-  ros__parameters:
-    decoration: "a"
+hello_world:
+  talker:
+    ros__parameters:
+      decoration: aaa

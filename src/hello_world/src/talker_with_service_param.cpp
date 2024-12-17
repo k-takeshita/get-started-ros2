@@ -20,10 +20,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 
-#include "hello_world_msgs/srv/set_message.hpp"
-
 using namespace std::chrono_literals;
-using hello_world_msgs::srv::SetMessage;
 
 class Talker : public rclcpp::Node
 {
@@ -49,21 +46,6 @@ public:
     pub_ = create_publisher<std_msgs::msg::String>(topic_name, qos);
     timer_ = create_wall_timer(100ms, publish_message);
 
-    auto handle_set_message =
-      [this](const std::shared_ptr<rmw_request_id_t> request_header,
-      const std::shared_ptr<SetMessage::Request> request,
-      std::shared_ptr<SetMessage::Response> response) -> void
-      {
-        (void)request_header;
-        RCLCPP_INFO(this->get_logger(), "message %s -> %s",
-                    this->data_.c_str(), request->message.c_str());
-        this->data_ = request->message;
-        response->result = true;
-      };
-
-    srv_ = create_service<SetMessage>(
-      "set_message", handle_set_message);
-
     // decorationパラメータの宣言
     decoration_ = declare_parameter("decoration", "");
     // decorationパラメータの監視
@@ -78,7 +60,6 @@ public:
 private:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Service<SetMessage>::SharedPtr srv_;
   std::shared_ptr<rclcpp::ParameterEventHandler> param_subscriber_;
   std::shared_ptr<rclcpp::ParameterCallbackHandle> cb_handle_;
   std::string data_;

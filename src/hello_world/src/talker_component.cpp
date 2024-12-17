@@ -11,53 +11,46 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <cstdio>
 
 #include <chrono>
-#include <cstdio>
 #include <memory>
 #include <string>
+
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 
-using namespace std::chrono_literals;
+namespace hello_world {
 
-// ネームスペースの設定
-namespace hello_world
-{
-
-class TalkerComponent : public rclcpp::Node
-{
-public:
+class TalkerComponent : public rclcpp::Node {
+ public:
   // コンストラクター引数をNodeOptionsに変更
-  explicit TalkerComponent(const rclcpp::NodeOptions & options)
-  : Node("talker_component", options), count_(0)
-  {
-    auto publish_message =
-      [this]() -> void
-      {
-        // ゼロコピーのためには，送信するメッセージがUniquePtrであることが大事らしい
-        auto msg = std::make_unique<std_msgs::msg::String>();
-        msg->data = "Hello World! " + std::to_string(count_++);
+  explicit TalkerComponent(const rclcpp::NodeOptions& options)
+      : Node("talker_component", options), count_(0) {
+    auto publish_message = [this]() -> void {
+      // ゼロコピーのためには，送信するメッセージがUniquePtrであることが大事
+      // publish関数自体はメッセージの参照も受け取るが，その場合はコピーが発生する
+      auto msg = std::make_unique<std_msgs::msg::String>();
+      msg->data = "Hello World! " + std::to_string(count_++);
 
-        RCLCPP_INFO(this->get_logger(), "[%p] %s", msg.get(), msg->data.c_str());
-        // UniquePtrなのでstd::move()でmoveする
-        pub_->publish(std::move(msg));
-      };
+      RCLCPP_INFO(this->get_logger(), "[%p] %s", msg.get(), msg->data.c_str());
+      // UniquePtrなのでstd::move()でmoveする
+      pub_->publish(std::move(msg));
+    };
 
     rclcpp::QoS qos(rclcpp::KeepLast(10));
     pub_ = create_publisher<std_msgs::msg::String>("chatter", qos);
-    timer_ = create_wall_timer(1s, publish_message);
+    timer_ = create_wall_timer(std::chrono::seconds(1), publish_message);
   }
 
-private:
+ private:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
   uint32_t count_;
-};  // class TalkerComponent
+};
 
 }  // namespace hello_world
 
-#include "rclcpp_components/register_node_macro.hpp"
-
 // クラスローダーにコンポーネントを登録
+#include "rclcpp_components/register_node_macro.hpp"
 RCLCPP_COMPONENTS_REGISTER_NODE(hello_world::TalkerComponent)
